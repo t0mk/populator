@@ -91,7 +91,7 @@ func get(repo map[string]string, repoUrl string) error {
 	p("About to git clone/pull repo:", color.FgGreen)
 	p(repoUrl, color.FgBlue)
 	if _, ok := repo[localDirKey]; !ok {
-		p("No LocalDir specified for this repo. I will clone it to randim dir.", color.FgMagenta)
+		p("No LocalDir specified for this repo. I will clone it to random dir.", color.FgMagenta)
 		sliced := strings.Split(strings.TrimSuffix(repoUrl, ".git"), "/")
 		shortName := sliced[len(sliced)-1]
 		repo[localDirKey] = path.Join(os.Getenv("HOME"), nextSuffix()+"_"+shortName)
