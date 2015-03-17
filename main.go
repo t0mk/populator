@@ -44,10 +44,19 @@ func nextSuffix() string {
 	return strconv.Itoa(int(1e9 + r%1e9))[1:]
 }
 
+var black = color.New(color.FgBlack, color.Bold)
+
+type colorFunction func(format string, a ...interface{})
+
+func p(text string, cr color.Attribute) {
+	color.New(color.FgBlack, color.Bold, color.BgWhite).Printf("=>")
+	fmt.Printf(" ")
+	color.New(cr, color.Bold).Println(text)
+}
+
 func run(args []string) {
-	darkGreen := color.New(color.FgGreen, color.Bold)
-	darkGreen.Printf("About to run\n")
-	color.Red("$ " + strings.Join(args, " "))
+	p("About to run command", color.FgGreen)
+	p("$ "+strings.Join(args, " "), color.FgRed)
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -55,14 +64,14 @@ func run(args []string) {
 }
 
 func build(name string, path string) {
-
+	path = expandTilde(path)
 	finfo, _ := os.Stat(path)
 	if finfo == nil {
-		fmt.Println("dir ", path, " does not exist => not building", name)
+		color.Red("dir ", path, " does not exist => not building", name, "\n")
 		return
 	}
 	if !finfo.IsDir() {
-		fmt.Println("file ", path, " is not a directory => not building", name)
+		color.Red("file ", path, " is not a directory => not building", name, "\n")
 		return
 	}
 	run([]string{"docker", "build", "-t", name, path})
@@ -79,13 +88,15 @@ func expandTilde(ppath string) string {
 }
 
 func get(repo map[string]string, repoUrl string) error {
-	fmt.Println("getting ", repoUrl)
+	p("About to git clone/pull repo:", color.FgGreen)
+	p(repoUrl, color.FgBlue)
 	if _, ok := repo[localDirKey]; !ok {
-		fmt.Println("no LocalDir specified for repo ", repoUrl, " will clone it to random dir")
+		p("No LocalDir specified for this repo. I will clone it to randim dir.", color.FgMagenta)
 		sliced := strings.Split(strings.TrimSuffix(repoUrl, ".git"), "/")
 		shortName := sliced[len(sliced)-1]
 		repo[localDirKey] = path.Join(os.Getenv("HOME"), nextSuffix()+"_"+shortName)
-		fmt.Println("random dir for repo ", repoUrl, " is ", repo[localDirKey])
+		p("Random dir for this repo is:", color.FgMagenta)
+		p(repo[localDirKey], color.FgBlue)
 	}
 	gitcmd := "clone"
 	repo[localDirKey] = expandTilde(repo[localDirKey])
@@ -101,12 +112,12 @@ func get(repo map[string]string, repoUrl string) error {
 		once.Do(func() { run([]string{"git", "config", "--global", "credentials.helper", "cache"}) })
 	}
 	if gitcmd == "pull" {
-		fmt.Println("Pulling repo", repoUrl, "to dir", repo[localDirKey])
+		p("Changing wokring dir to:", color.FgGreen)
+		p(repo[localDirKey], color.FgBlue)
 		os.Chdir(repo[localDirKey])
 		run([]string{"git", gitcmd})
 	}
 	if gitcmd == "clone" {
-		fmt.Println("Cloning repo", repoUrl, "to dir", repo[localDirKey])
 		run([]string{"git", gitcmd, "--depth", "1", repoUrl, repo[localDirKey]})
 	}
 	return nil
@@ -132,7 +143,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	fmt.Println(m)
 	if !(*buildOnlyPtr) {
 		for repoUrl, repoMap := range m {
 			if strings.Contains(repoUrl, *onlyPtr) {
@@ -141,19 +151,28 @@ func main() {
 					log.Fatalf("error while getting %s: %v", repoUrl, err)
 				}
 				fmt.Println("\n")
+			} else {
+				p("Not cloning/pulling "+repoUrl+" as it doesnt match "+*onlyPtr, color.FgCyan)
 			}
 		}
+	} else {
+		p("Not cloning/pulling at all.", color.FgRed)
 	}
 	if !(*downloadOnlyPtr) {
 		for _, repoMap := range m {
 			localRepoDir := repoMap[localDirKey]
-			fmt.Println(localRepoDir)
 			for repoPath, imageName := range repoMap {
-				if repoPath != localDirKey && strings.Contains(imageName, *onlyPtr) {
-					build(imageName, path.Join(localRepoDir, repoPath))
-					fmt.Println("\n")
+				if repoPath != localDirKey {
+					if strings.Contains(imageName, *onlyPtr) {
+						build(imageName, path.Join(localRepoDir, repoPath))
+						fmt.Println("\n")
+					} else {
+						p("Not building "+imageName+" as it doesnt match "+*onlyPtr, color.FgCyan)
+					}
 				}
 			}
 		}
+	} else {
+		p("Not building at all.", color.FgRed)
 	}
 }

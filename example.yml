@@ -3,6 +3,7 @@
   ./ : whatever/php
 
 'https://github.com/tutumcloud/tutum-docker-mysql':
+  localDir: /home/tomk/648738401_tutum-docker-mysql
   5.5/ : whatevs/mysql5.5
-  5.6/ : whatevs/mysql5.5
+  5.6/ : whatevs/mysql5.6
 
