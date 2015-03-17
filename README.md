@@ -44,3 +44,5 @@ For instance, with the `example.yml` above, you can choose to only build mysql 5
 ```
 $ ./populator -config example.yml -onlybuild -only 5.5
 ```
+
+If you are cloning from private repos and you are asked for username and password too much, run populator with `-credcache` flag.

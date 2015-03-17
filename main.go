@@ -124,7 +124,7 @@ func get(repo map[string]string, repoUrl string) error {
 }
 
 func main() {
-	cacheCredentialsPtr = flag.Bool("credcache", true, "should git cache credentials?")
+	cacheCredentialsPtr = flag.Bool("credcache", false, "should git cache credentials?")
 	configFilePtr := flag.String("config", flagRequired, "configuration file containing repo urls and image names and locations")
 	buildOnlyPtr := flag.Bool("onlybuild", false, "do not git pull/clone, only docker build")
 	onlyPtr := flag.String("only", "", "only download repos matching this substring | only build images matching this substring")
