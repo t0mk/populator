@@ -1,6 +1,8 @@
 # Populator
 
-is a tool that downloads Docker image repositories and builds them, based on simple configuration file. You use it as a faster alternative to get images to your local docker, if your image registry is slow (i.e. if you are using Docker Hub).
+Populator is a tool that downloads Docker image repositories and builds them, based on simple configuration file.
+
+You use it as a faster alternative to get images to your local docker, if your image registry is slow (i.e. if you are using Docker Hub).
 
 You can also use this if you don't want to upload your images to Docker Hub and you don't have a private regstry yet.
 
