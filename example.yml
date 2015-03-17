@@ -1,0 +1,8 @@
+'https://github.com/tutumcloud/tutum-docker-php':
+  localDir: ~/tutum-php
+  ./ : whatever/php
+
+'https://github.com/tutumcloud/tutum-docker-mysql':
+  5.5/ : whatevs/mysql5.5
+  5.6/ : whatevs/mysql5.5
+
