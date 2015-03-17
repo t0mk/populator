@@ -2,9 +2,15 @@
 
 Populator is a tool that downloads Docker image repositories and builds them, based on simple configuration file.
 
+## How it looks
+
+![Shell yeah!](http://i.imgur.com/cjUfPYq.png)
+
+## Motivation
+
 You use it as a faster alternative to get images to your local docker, if your image registry is slow (i.e. if you are using Docker Hub).
 
-You can also use this if you don't want to upload your images to Docker Hub and you don't have a private regstry yet.
+You can also use it if you don't want to upload your images to Docker Hub and you don't have a private regstry yet.
 
 You can describe your repositories and images in yaml as
 
