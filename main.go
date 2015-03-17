@@ -44,10 +44,6 @@ func nextSuffix() string {
 	return strconv.Itoa(int(1e9 + r%1e9))[1:]
 }
 
-var black = color.New(color.FgBlack, color.Bold)
-
-type colorFunction func(format string, a ...interface{})
-
 func p(text string, cr color.Attribute) {
 	color.New(color.FgBlack, color.Bold, color.BgWhite).Printf("=>")
 	fmt.Printf(" ")
