@@ -50,13 +50,23 @@ func p(text string, cr color.Attribute) {
 	color.New(cr, color.Bold).Println(text)
 }
 
-func run(args []string) {
+func run(args ...string) (string, error) {
+	getStdout := args[0] == "_return_stdout_"
+	if getStdout {
+		args = args[1:]
+	}
 	p("About to run command", color.FgGreen)
 	p("$ "+strings.Join(args, " "), color.FgRed)
 	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	if getStdout {
+		bs, err := cmd.Output()
+		return string(bs), err
+	} else {
+		cmd.Stdout = os.Stdout
+		err := cmd.Run()
+		return "", err
+	}
 }
 
 func build(name string, path string) {
@@ -70,7 +80,7 @@ func build(name string, path string) {
 		color.Red("file ", path, " is not a directory => not building", name, "\n")
 		return
 	}
-	run([]string{"docker", "build", "-t", name, path})
+	run("docker", "build", "-t", name, path)
 
 }
 
@@ -100,21 +110,34 @@ func get(repo map[string]string, repoUrl string) error {
 	if finfo != nil {
 		if finfo.IsDir() {
 			gitcmd = "pull"
+
 		} else {
 			return errors.New(repo[localDirKey] + " exists and is not a directory")
 		}
 	}
 	if *cacheCredentialsPtr {
-		once.Do(func() { run([]string{"git", "config", "--global", "credentials.helper", "cache"}) })
+		once.Do(func() { run("git", "config", "--global", "credentials.helper", "cache") })
 	}
 	if gitcmd == "pull" {
 		p("Changing wokring dir to:", color.FgGreen)
 		p(repo[localDirKey], color.FgBlue)
 		os.Chdir(repo[localDirKey])
-		run([]string{"git", gitcmd})
+		url, err := run("_return_stdout_", "git", "config", "--get", "remote.origin.url")
+		if err != nil {
+			p("Directory "+repo[localDirKey]+" is not a git repo.", color.FgRed)
+			log.Fatal(err)
+		}
+		url = strings.TrimSpace(url)
+		if url != repoUrl {
+			p("The origin url of the repo in "+repo[localDirKey]+" is not the same as the url from the config file.", color.FgRed)
+			p("From config file: "+repoUrl, color.FgBlue)
+			p("Repo origin remote: "+url, color.FgBlue)
+			log.Fatalf("Check the directory and remote url.")
+		}
+		run("git", gitcmd)
 	}
 	if gitcmd == "clone" {
-		run([]string{"git", gitcmd, "--depth", "1", repoUrl, repo[localDirKey]})
+		run("git", gitcmd, "--depth", "1", repoUrl, repo[localDirKey])
 	}
 	return nil
 }
