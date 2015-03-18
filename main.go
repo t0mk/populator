@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/user"
@@ -93,6 +94,15 @@ func expandTilde(ppath string) string {
 	return ppath
 }
 
+func likeAlmostTheSame(url1 string, url2 string) bool {
+	purl1, _ := url.Parse(url1)
+	purl2, _ := url.Parse(url2)
+	if purl1.Host == purl2.Host && purl1.Path == purl2.Path {
+		return true
+	}
+	return false
+}
+
 func get(repo map[string]string, repoUrl string) error {
 	p("About to git clone/pull repo:", color.FgGreen)
 	p(repoUrl, color.FgBlue)
@@ -122,16 +132,17 @@ func get(repo map[string]string, repoUrl string) error {
 		p("Changing wokring dir to:", color.FgGreen)
 		p(repo[localDirKey], color.FgBlue)
 		os.Chdir(repo[localDirKey])
-		url, err := run("_return_stdout_", "git", "config", "--get", "remote.origin.url")
+		existingUrl, err := run("_return_stdout_", "git", "config", "--get", "remote.origin.url")
 		if err != nil {
 			p("Directory "+repo[localDirKey]+" is not a git repo.", color.FgRed)
 			log.Fatal(err)
 		}
-		url = strings.TrimSpace(url)
-		if url != repoUrl {
+		existingUrl = strings.TrimSpace(existingUrl)
+
+		if !likeAlmostTheSame(existingUrl, repoUrl) {
 			p("The origin url of the repo in "+repo[localDirKey]+" is not the same as the url from the config file.", color.FgRed)
 			p("From config file: "+repoUrl, color.FgBlue)
-			p("Repo origin remote: "+url, color.FgBlue)
+			p("Repo origin remote: "+existingUrl, color.FgBlue)
 			log.Fatalf("Check the directory and remote url.")
 		}
 		run("git", gitcmd)
