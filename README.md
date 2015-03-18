@@ -4,7 +4,7 @@ Populator is a tool that downloads Docker image repositories and builds them, ba
 
 ## How it looks
 
-![Shell yeah!](http://i.imgur.com/cjUfPYq.png)
+![Shell yeah!](http://i.imgur.com/q7kOw4r.png)
 
 ## Motivation
 
