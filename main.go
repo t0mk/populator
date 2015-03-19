@@ -128,7 +128,7 @@ func get(repo map[string]string, repoUrl string) error {
 		}
 	}
 	if *cacheCredentialsPtr {
-		once.Do(func() { run("git", "config", "--global", "credentials.helper", "cache") })
+		once.Do(func() { run("git", "config", "--global", "credential.helper", "cache") })
 	}
 	if gitcmd == "pull" {
 		p("Changing wokring dir to:", color.FgGreen)
