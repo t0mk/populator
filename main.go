@@ -97,8 +97,10 @@ func expandTilde(ppath string) string {
 func likeAlmostTheSame(url1 string, url2 string) bool {
 	purl1, _ := url.Parse(url1)
 	purl2, _ := url.Parse(url2)
-	if purl1.Host == purl2.Host && purl1.Path == purl2.Path {
-		return true
+	if purl1.Host == purl2.Host {
+		if strings.TrimSuffix(purl1.Path, ".git") == strings.TrimSuffix(purl2.Path, ".git") {
+			return true
+		}
 	}
 	return false
 }
