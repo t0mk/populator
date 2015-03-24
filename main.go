@@ -81,7 +81,10 @@ func build(name string, path string) {
 		color.Red("file ", path, " is not a directory => not building", name, "\n")
 		return
 	}
-	run("docker", "build", "-t", name, path)
+	_, err := run("docker", "build", "-t", name, path)
+	if err != nil {
+		log.Fatalf("Image not built properly, see above, . err")
+	}
 
 }
 
